@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-import pika, sys, os
+import pika, sys, os, json
 from minio import Minio
 from minio.error import S3Error
 
@@ -38,6 +38,7 @@ def main():
     def callback(ch, method, properties, body):
         print(" [x] Received %r" % body)
         print(" [x] Received props %r" % properties)
+        data = json.loads(body)
         process_file(body.Key)
     
     channel.basic_consume(queue='unpacker-queue',
