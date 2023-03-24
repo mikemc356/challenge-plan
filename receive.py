@@ -2,6 +2,7 @@
 import pika, sys, os, json
 from minio import Minio
 from minio.error import S3Error
+import zipfile
 
 def process_file(name):
     try:
@@ -30,6 +31,11 @@ def process_file(name):
             )
         print(f'Back from get')
         print('Response=>',response)
+        with open(name, "wb") as f:
+            f.write(response.content)
+        
+        with zipfile.ZipFile(name, 'r') as zip_ref:
+            zip_ref.extractall("/")
 
     except Exception as e:
         print('Exception {e}',e)
