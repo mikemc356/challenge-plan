@@ -9,7 +9,7 @@ def process_file(name):
         # and secret key.
         print(f'Processing file {name}')
         client = Minio(
-            "minio-mike-mcnamee.flows-dev-cluster-7c309b11fc78649918d0c8b91bcb5925-0000.eu-gb.containers.appdomain.cloud:8080",
+            "minio-mike-mcnamee.flows-dev-cluster-7c309b11fc78649918d0c8b91bcb5925-0000.eu-gb.containers.appdomain.cloud:80",
             access_key="miniouser1",
             secret_key="miniopassword",
             secure=False
