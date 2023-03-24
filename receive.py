@@ -10,7 +10,7 @@ def process_file(name):
         print(f'Processing file {name}')
         client = Minio(
             "minio-mike-mcnamee.flows-dev-cluster-7c309b11fc78649918d0c8b91bcb5925-0000.eu-gb.containers.appdomain.cloud:8080",
-            access_key="miniouser",
+            access_key="miniouser1",
             secret_key="miniopassword",
             secure=False
         )
