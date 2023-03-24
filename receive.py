@@ -9,9 +9,10 @@ def process_file(name):
         # and secret key.
         print(f'Processing file {name}')
         client = Minio(
-            "minio-mike-mcnamee.flows-dev-cluster-7c309b11fc78649918d0c8b91bcb5925-0000.eu-gb.containers.appdomain.cloud",
+            "minio-mike-mcnamee.flows-dev-cluster-7c309b11fc78649918d0c8b91bcb5925-0000.eu-gb.containers.appdomain.cloud:8080",
             access_key="miniouser",
             secret_key="miniopassword",
+            secure=False
         )
 
         found = client.bucket_exists("input")
