@@ -35,7 +35,7 @@ def process_file(name):
             f.write(response.content)
         
         with zipfile.ZipFile(name, 'r') as zip_ref:
-            zip_ref.extractall("/")
+            zip_ref.extractall("/tmp")
 
     except Exception as e:
         print('Exception {e}',e)
