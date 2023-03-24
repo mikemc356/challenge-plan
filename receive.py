@@ -25,9 +25,10 @@ def process_file(name):
                 bucket_name = 'input',
                 object_name= name
             )
+        print(f'Back from get')
 
     except Exception as e:
-        print('Exception {e}')
+        print('Exception {e}',e)
 
 def main():
     connection = pika.BlockingConnection(pika.ConnectionParameters('rabbitmq'))
