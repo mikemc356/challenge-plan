@@ -15,12 +15,15 @@ def process_file(name):
             secure=False
         )
 
+        print(f'Client created')
+
         found = client.bucket_exists("input")
         if not found:
             print("Bucket 'input' does not exist")
         else:
             print("Bucket 'input' already exists")
     
+        print(f'Getting object')
         response = client.get_object(
                 bucket_name = 'input',
                 object_name=name
