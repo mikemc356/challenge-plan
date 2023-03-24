@@ -29,6 +29,7 @@ def process_file(name):
                 object_name=name
             )
         print(f'Back from get')
+        print('Response=>',response)
 
     except Exception as e:
         print('Exception {e}',e)
