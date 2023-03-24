@@ -7,7 +7,7 @@ def process_file(name):
     try:
         # Create a client with the MinIO server playground, its access key
         # and secret key.
-        printf(f'Processing file {name}')
+        print(f'Processing file {name}')
         client = Minio(
             "http://minio-mike-mcnamee.flows-dev-cluster-7c309b11fc78649918d0c8b91bcb5925-0000.eu-gb.containers.appdomain.cloud",
             access_key="miniouser",
