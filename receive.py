@@ -9,12 +9,11 @@ def process_file(name):
         # and secret key.
         print(f'Processing file {name}')
         client = Minio(
-            "http://minio-mike-mcnamee.flows-dev-cluster-7c309b11fc78649918d0c8b91bcb5925-0000.eu-gb.containers.appdomain.cloud",
+            "minio-mike-mcnamee.flows-dev-cluster-7c309b11fc78649918d0c8b91bcb5925-0000.eu-gb.containers.appdomain.cloud",
             access_key="miniouser",
             secret_key="miniopassword",
         )
 
-        # Make 'asiatrip' bucket if not exist.
         found = client.bucket_exists("input")
         if not found:
             print("Bucket 'input' does not exist")
@@ -23,7 +22,7 @@ def process_file(name):
     
         response = client.get_object(
                 bucket_name = 'input',
-                object_name= name
+                object_name=name
             )
         print(f'Back from get')
 
@@ -41,7 +40,8 @@ def main():
         print(" [x] Received props %r" % properties)
         data = json.loads(body)
         print(f' Data==>{data}')
-        process_file(data["Key"])
+        tokens = data["Key"].split('/')
+        process_file(tokens[1])
     
     channel.basic_consume(queue='unpacker-queue',
                       auto_ack=True,
