@@ -39,7 +39,7 @@ def main():
         print(" [x] Received %r" % body)
         print(" [x] Received props %r" % properties)
         data = json.loads(body)
-        process_file(body.Key)
+        process_file(body.key)
     
     channel.basic_consume(queue='unpacker-queue',
                       auto_ack=True,
