@@ -31,10 +31,10 @@ def process_file(name):
             )
         print(f'Back from get')
         print('Response=>',response)
-        with open(name, "wb") as f:
+        with open('/tmp/'+name, "wb") as f:
             f.write(response.content)
         
-        with zipfile.ZipFile(name, 'r') as zip_ref:
+        with zipfile.ZipFile('/tmp/'+name, 'r') as zip_ref:
             zip_ref.extractall("/tmp")
 
     except Exception as e:
