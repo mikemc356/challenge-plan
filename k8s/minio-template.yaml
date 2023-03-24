@@ -1,0 +1,239 @@
+#############################################################
+# Minio OpenShift Template
+#
+# Objects in this template are grouped by application
+# and ordered by:
+#   * Route
+#   * Service
+#   * DeploymentConfig
+#   * PersistentVolumeClaim
+#   * Secret
+#############################################################
+apiVersion: template.openshift.io/v1
+kind: Template
+labels:
+  template: "minio"
+message: |-
+  A minio object store has been created in you project.
+         Password: "${MINIO_PASSWORD}"
+  To connect to minio from outside of the cluster use:
+         URL: minio-"${OPENSHIFT_PROJECT}.${OPENSHIFT_BASE_URL}"
+
+metadata:
+  name: minio
+  annotations:
+    openshift.io/display-name: minio
+    description: Object store, used to store processed and unprocessed content
+    openshift.io/provider-display-name: minio
+    tags: object-store
+objects:
+#############################################################
+# MinIO Route
+#############################################################
+- apiVersion: route.openshift.io/v1
+  kind: Route
+  metadata:
+    labels:
+      app: minio
+    name: minio
+  spec:
+    host: "minio-${OPENSHIFT_PROJECT}.${OPENSHIFT_BASE_URL}"
+    port:
+      targetPort: 9000
+    to:
+      kind: Service
+      name: minio-service
+      weight: 100
+    wildcardPolicy: None
+#############################################################
+# MinIO Route
+#############################################################
+- apiVersion: route.openshift.io/v1
+  kind: Route
+  metadata:
+    labels:
+      app: minio
+    name: minio-console
+  spec:
+    host: "minio-console-${OPENSHIFT_PROJECT}.${OPENSHIFT_BASE_URL}"
+    port:
+      targetPort: 9001
+    to:
+      kind: Service
+      name: minio-console
+      weight: 100
+    wildcardPolicy: None
+#############################################################
+# MinIO Service
+#############################################################
+- apiVersion: v1
+  kind: Service
+  metadata:
+    labels:
+      app: minio
+    name: minio-service
+  spec:
+    externalTrafficPolicy: Cluster
+    ports:
+    - port: 9000
+      protocol: TCP
+      targetPort: 9000
+    selector:
+      app: minio
+      deploymentconfig: minio
+    sessionAffinity: None
+    type: LoadBalancer
+#############################################################
+# MinIO Service
+#############################################################
+- apiVersion: v1
+  kind: Service
+  metadata:
+    labels:
+      app: minio
+    name: minio-console
+  spec:
+    externalTrafficPolicy: Cluster
+    ports:
+    - port: 9001
+      protocol: TCP
+      targetPort: 9001
+    selector:
+      app: minio
+      deploymentconfig: minio
+    sessionAffinity: None
+    type: LoadBalancer
+#############################################################
+# MinIO DeploymentConfig
+#############################################################
+- apiVersion: apps.openshift.io/v1
+  kind: DeploymentConfig
+  metadata:
+    labels:
+      app: minio
+    name: minio
+  spec:
+    replicas: 1
+    revisionHistoryLimit: 10
+    selector:
+      app: minio
+      deploymentconfig: minio
+    template:
+      metadata:
+        labels:
+          app: minio
+          deploymentconfig: minio
+        annotations:
+          sidecar.istio.io/inject: "true"
+      spec:
+        containers:
+        - name: minio-container
+          env:
+          - name: MINIO_ROOT_USER
+            valueFrom:
+              secretKeyRef:
+                key: MINIO_USERNAME
+                name: minio-secret
+          - name: MINIO_ROOT_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                key: MINIO_PASSWORD
+                name: minio-secret
+          image: minio/minio:latest
+          args:
+            - server
+            - /data
+            - '--console-address'
+            - ':9001'
+          imagePullPolicy: IfNotPresent
+          livenessProbe:
+            failureThreshold: 3
+            httpGet:
+              path: /minio/health/live
+              port: 9000
+              scheme: HTTP
+            initialDelaySeconds: 120
+            periodSeconds: 20
+            successThreshold: 1
+            timeoutSeconds: 1
+          ports:
+          - containerPort: 9000
+            protocol: TCP
+          readinessProbe:
+            failureThreshold: 3
+            httpGet:
+              path: /minio/health/ready
+              port: 9000
+              scheme: HTTP
+            initialDelaySeconds: 120
+            periodSeconds: 20
+            successThreshold: 1
+            timeoutSeconds: 1
+          resources: {}
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+          volumeMounts:
+          - mountPath: /data
+            name: data
+        dnsPolicy: ClusterFirst
+        restartPolicy: Always
+        schedulerName: default-scheduler
+        securityContext: {}
+        terminationGracePeriodSeconds: 30
+        volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: minio-pvc-${OPENSHIFT_PROJECT}
+    test: false
+#############################################################
+# MinIO PersistentVolumeClaim
+#############################################################
+- apiVersion: v1
+  kind: PersistentVolumeClaim
+  metadata:
+    name: minio-pvc-${OPENSHIFT_PROJECT}
+    labels:
+      billingType: hourly
+      region: # Example: us-south
+      zone: # Example: dal13
+  spec:
+    accessModes:
+    - ReadWriteOnce
+    resources:
+      requests:
+        storage: 10Mi
+  status:
+    accessModes:
+    - ReadWriteOnce
+    capacity:
+      storage: 20Mi
+    phase: Bound
+#############################################################
+# Minio Secret
+#############################################################
+- apiVersion: v1
+  kind: Secret
+  metadata:
+    name: minio-secret
+  stringData:
+    MINIO_USERNAME: "${MINIO_USERNAME}"
+    MINIO_PASSWORD: "${MINIO_PASSWORD}"
+  type: Opaque
+#############################################################
+# Template Parameters
+#############################################################
+parameters:
+- name: OPENSHIFT_PROJECT
+  description: The project within OpenShift where the application is to be deployed
+  required: true
+- name: MINIO_USERNAME
+  description: The username for the minio object store. e.g. minio
+  required: true
+- name: MINIO_PASSWORD
+  description: The password for the minio object store.
+  required: true
+- name: OPENSHIFT_BASE_URL
+  description: The base url used for the cluster or system. e.g. apps.example.com
+  required: true
+  
+
