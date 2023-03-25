@@ -42,9 +42,8 @@ def process_file(name):
         with zipfile.ZipFile(io.BytesIO(response)) as thezip:
             for zipinfo in thezip.infolist():
                 with thezip.open(zipinfo) as thefile:
-                   client.put_object()
-                   result = client.put_object("unpacked", zipinfo.filename, thefile, len(thefile))
                    print(f'File from zip {zipinfo.filename}')
+                   result = client.put_object("unpacked", zipinfo.filename, thefile, len(thefile))
                    return zipinfo.filename, thefile
 
     except Exception as e:
