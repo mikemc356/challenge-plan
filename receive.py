@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-import pika, sys, os, json, io, amqp
+import pika, sys, os, json, io
 from minio import Minio
 from minio.error import S3Error
 import zipfile
