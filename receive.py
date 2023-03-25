@@ -39,11 +39,12 @@ def process_file(name):
         
         #with zipfile.ZipFile('/tmp/'+name, 'r') as zip_ref:
         #    zip_ref.extractall("/tmp")
-        with zipfile.ZipFile(io.BytesIO(response.content)) as thezip:
+        with zipfile.ZipFile(io.BytesIO(response)) as thezip:
             for zipinfo in thezip.infolist():
                 with thezip.open(zipinfo) as thefile:
                    client.put_object()
                    result = client.put_object("unpacked", zipinfo.filename, thefile, len(thefile))
+                   print(f'File from zip {zipinfo.filename}')
                    return zipinfo.filename, thefile
 
     except Exception as e:
