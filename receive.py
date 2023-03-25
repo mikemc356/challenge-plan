@@ -39,7 +39,7 @@ def process_file(name):
         
         #with zipfile.ZipFile('/tmp/'+name, 'r') as zip_ref:
         #    zip_ref.extractall("/tmp")
-        with zipfile.ZipFile(response.data) as thezip:
+        with zipfile.ZipFile(response.stream(32*1024)) as thezip:
             for zipinfo in thezip.infolist():
                 with thezip.open(zipinfo) as thefile:
                    print(f'File from zip {zipinfo.filename}')
