@@ -44,7 +44,8 @@ def process_file(name):
             #result = client.put_object("unpacked", list, thefile, len(thefile),"binary/octet-stream")
             result = client.fput_object("unpacked", list[0],'/tmp/'+name,)
             print('After object put')
-            
+            return list[0]
+
     except Exception as e:
         print('Exception {e}',e)
     
@@ -60,7 +61,7 @@ def main():
         data = json.loads(body)
         print(f' Data==>{data}')
         tokens = data["Key"].split('/')
-        name, thefile = process_file(tokens[1])
+        name = process_file(tokens[1])
         ch.basic_publish(amqp.Message(name), routing_key='formatter-queue')
     
     channel.basic_consume(queue='unpacker-queue',
