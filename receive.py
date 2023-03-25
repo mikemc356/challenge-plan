@@ -41,15 +41,13 @@ def process_file(name):
             zip_ref.extractall("/tmp")
             list = zip_ref.namelist()
             print(f"list ==>{list}")
-            #result = client.put_object("unpacked", zipinfo.filename, thefile, len(thefile),"binary/octet-stream")
-
+            #result = client.put_object("unpacked", list, thefile, len(thefile),"binary/octet-stream")
+            result = client.fput_object("unpacked", list[0],'/tmp/'+name,)
+            print('After object put')
+            
     except Exception as e:
         print('Exception {e}',e)
     
-    finally:
-        response.close()
-        response.release_conn()
-
 def main():
     connection = pika.BlockingConnection(pika.ConnectionParameters('rabbitmq'))
     channel = connection.channel()
