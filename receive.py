@@ -36,7 +36,8 @@ def process_file(name):
                 file_data.write(d)
         
         with zipfile.ZipFile('/tmp/'+name, 'r') as zip_ref:
-            zip_ref.extractall("/tmp")
+            list = zip_ref.extractall("/tmp")
+            print(f'Files {list}')
 
     except Exception as e:
         print('Exception {e}',e)
