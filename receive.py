@@ -31,8 +31,9 @@ def process_file(name):
             )
         print(f'Back from get')
         print('Response=>',response)
-        with open('/tmp/'+name, "wb") as f:
-            f.write(response.raw)
+        with open('/tmp/'+name, 'wb') as file_data:
+            for d in response.stream(32*1024):
+                file_data.write(d)
         
         with zipfile.ZipFile('/tmp/'+name, 'r') as zip_ref:
             zip_ref.extractall("/tmp")
