@@ -62,7 +62,8 @@ def main():
         print(f' Data==>{data}')
         tokens = data["Key"].split('/')
         name = process_file(tokens[1])
-        ch.basic_publish(amqp.Message(name), routing_key='formatter-queue')
+        ch.basic_publish(exchange='dw',
+                      body=name, routing_key='formatter-queue')
     
     channel.basic_consume(queue='unpacker-queue',
                       auto_ack=True,
