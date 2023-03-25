@@ -33,21 +33,22 @@ def process_file(name):
             )
         print(f'Back from get')
         print('Response=>',response)
-        #with open('/tmp/'+name, 'wb') as file_data:
-        #    for d in response.stream(32*1024):
-        #        file_data.write(d)
+        with open('/tmp/'+name, 'wb') as file_data:
+            for d in response.stream(32*1024):
+                file_data.write(d)
         
-        #with zipfile.ZipFile('/tmp/'+name, 'r') as zip_ref:
-        #    zip_ref.extractall("/tmp")
-        with zipfile.ZipFile(response.stream(32*1024)) as thezip:
-            for zipinfo in thezip.infolist():
-                with thezip.open(zipinfo) as thefile:
-                   print(f'File from zip {zipinfo.filename}')
-                   result = client.put_object("unpacked", zipinfo.filename, thefile, len(thefile),"binary/octet-stream")
-                   return zipinfo.filename, thefile
+        with zipfile.ZipFile('/tmp/'+name, 'r') as zip_ref:
+            zip_ref.extractall("/tmp")
+            list = zip_ref.namelist()
+            print(f"list ==>{list}")
+            #result = client.put_object("unpacked", zipinfo.filename, thefile, len(thefile),"binary/octet-stream")
 
     except Exception as e:
         print('Exception {e}',e)
+    
+    finally:
+        response.close()
+        response.release_conn()
 
 def main():
     connection = pika.BlockingConnection(pika.ConnectionParameters('rabbitmq'))
