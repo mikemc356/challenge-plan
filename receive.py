@@ -4,13 +4,15 @@ from minio import Minio
 from minio.error import S3Error
 import zipfile
 
+host = "minio-mike-mcnamee.flows-dev-cluster-7c309b11fc78649918d0c8b91bcb5925-0000.eu-gb.containers.appdomain.cloud:80"
+
 def process_file(name):
     try:
         # Create a client with the MinIO server playground, its access key
         # and secret key.
         print(f'Processing file {name}')
         client = Minio(
-            "minio-mike-mcnamee.flows-dev-cluster-7c309b11fc78649918d0c8b91bcb5925-0000.eu-gb.containers.appdomain.cloud:80",
+            host,
             access_key="miniouser",
             secret_key="miniopassword",
             secure=False
@@ -31,13 +33,18 @@ def process_file(name):
             )
         print(f'Back from get')
         print('Response=>',response)
-        with open('/tmp/'+name, 'wb') as file_data:
-            for d in response.stream(32*1024):
-                file_data.write(d)
+        #with open('/tmp/'+name, 'wb') as file_data:
+        #    for d in response.stream(32*1024):
+        #        file_data.write(d)
         
-        with zipfile.ZipFile('/tmp/'+name, 'r') as zip_ref:
-            list = zip_ref.extractall("/tmp")
-            print(f'Files {list}')
+        #with zipfile.ZipFile('/tmp/'+name, 'r') as zip_ref:
+        #    zip_ref.extractall("/tmp")
+        with zipfile.ZipFile(io.BytesIO(response.content)) as thezip:
+            for zipinfo in thezip.infolist():
+                with thezip.open(zipinfo) as thefile:
+                   client.put_object()
+                   result = client.put_object("unpacked", zipinfo.filename, thefile, len(thefile))
+                   return zipinfo.filename, thefile
 
     except Exception as e:
         print('Exception {e}',e)
@@ -54,7 +61,8 @@ def main():
         data = json.loads(body)
         print(f' Data==>{data}')
         tokens = data["Key"].split('/')
-        process_file(tokens[1])
+        name, thefile = process_file(tokens[1])
+        ch.basic_publish(amqp.Message(name), routing_key='formatter-queue')
     
     channel.basic_consume(queue='unpacker-queue',
                       auto_ack=True,
