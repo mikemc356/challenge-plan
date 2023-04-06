@@ -33,30 +33,15 @@ def process_file(name):
         print(f'Back from get')
         
         new_code = True
-        if new_code == True:
-            in_memory_zip = io.BytesIO(response.data)
-            zf = zipfile.ZipFile(in_memory_zip, "a", zipfile.ZIP_DEFLATED, False)
-            list = zf.namelist()
+        in_memory_zip = io.BytesIO(response.data)
+        zf = zipfile.ZipFile(in_memory_zip, "a", zipfile.ZIP_DEFLATED, False)
+        list = zf.namelist()
 
-            for fileName in list:
-                zf.extract(fileName, path='/tmp')
-                print(f'Extracted {fileName}')
-                result = client.fput_object("unpacked",fileName,'/tmp/'+fileName,)
-                return fileName            
-        else:
-            print('Response=>',response)
-            with open('/tmp/'+name, 'wb') as file_data:
-                for d in response.stream(32*1024):
-                    file_data.write(d)
-        
-            with zipfile.ZipFile('/tmp/'+name, 'r') as zip_ref:
-                zip_ref.extractall("/tmp")
-                list = zip_ref.namelist()
-                print(f"list ==>{list}")
-                #result = client.put_object("unpacked", list, thefile, len(thefile),"binary/octet-stream")
-                result = client.fput_object("unpacked", list[0],'/tmp/'+name,)
-                print('After object put')
-                return list[0]
+        for fileName in list:
+            zf.extract(fileName, path='/tmp')
+            print(f'Extracted {fileName}')
+            result = client.fput_object("unpacked",fileName,'/tmp/'+fileName,)
+            return fileName            
 
     except Exception as e:
         print('Exception {e}',e)
