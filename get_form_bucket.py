@@ -5,6 +5,7 @@ from minio.error import S3Error
 import zipfile
 
 host = "minio-mike-mcnamee.flows-dev-cluster-7c309b11fc78649918d0c8b91bcb5925-0000.eu-gb.containers.appdomain.cloud:80"
+host = "52.87.255.213:9000"
 def process_file(name):
     try:
         # Create a client with the MinIO server playground, its access key
@@ -12,8 +13,10 @@ def process_file(name):
         print(f'Processing file {name}')
         client = Minio(
             host,
-            access_key="miniouser",
-            secret_key="miniopassword",
+            access_key="apricot",
+            secret_key="apricotapricot",
+#            access_key="miniouser",
+#            secret_key="miniopassword",
             secure=False
         )
 
@@ -39,10 +42,11 @@ def process_file(name):
             list = zf.namelist()
 
             for fileName in list:
-                zf.extract(fileName, path='/tmp')
+                zf.extract(fileName, path='data')
                 print(f'Extracted {fileName}')
                 result = client.fput_object("unpacked",fileName,fileName,)
-                return fileName            
+                return fileName
+            
         else:
             print('Response=>',response)
             with open('/tmp/'+name, 'wb') as file_data:
@@ -62,27 +66,8 @@ def process_file(name):
         print('Exception {e}',e)
     
 def main():
-    connection = pika.BlockingConnection(pika.ConnectionParameters('rabbitmq'))
-    channel = connection.channel()
+    process_file("TestZip.zip")
 
-    channel.queue_declare(queue='unpacker-queue')
-
-    def callback(ch, method, properties, body):
-        print(" [x] Received %r" % body)
-        print(" [x] Received props %r" % properties)
-        data = json.loads(body)
-        print(f' Data==>{data}')
-        tokens = data["Key"].split('/')
-        name = process_file(tokens[1])
-        ch.basic_publish(exchange='dw',
-                      body=name, routing_key='formatter-queue')
-    
-    channel.basic_consume(queue='unpacker-queue',
-                      auto_ack=True,
-                      on_message_callback=callback)
-
-    print(' [*] Waiting for messages. To exit press CTRL+C')
-    channel.start_consuming()
 
 if __name__ == '__main__':
     try:
