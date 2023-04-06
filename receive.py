@@ -41,7 +41,7 @@ def process_file(name):
             for fileName in list:
                 zf.extract(fileName, path='/tmp')
                 print(f'Extracted {fileName}')
-                result = client.fput_object("unpacked",fileName,fileName,)
+                result = client.fput_object("unpacked",fileName,'/tmp/'+fileName,)
                 return fileName            
         else:
             print('Response=>',response)
