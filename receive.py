@@ -32,7 +32,8 @@ def process_file(name):
                 object_name=name
             )
         print(f'Back from get')
-
+        
+        new_code = True
         if new_code == True:
             in_memory_zip = io.BytesIO(response)
             zf = zipfile.ZipFile(in_memory_zip, "a", zipfile.ZIP_DEFLATED, False)
